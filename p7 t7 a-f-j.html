@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="ISO-8859-1">
+		<title>p7 t7 final json to excel</title>
+		<style type="text/css">
+			.container{
+				margin: 20px;
+			}
+			
+			table,th {
+				border: 1px solid black;
+				border-collapse: collapse;
+			}
+			th{
+				padding: 5px;
+			}
+		</style>
+		
+		<script src="jquery-1.7.1.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+	
+	// 1 Display data on page load from json 
+				$.ajax({url:'demojson.json', dataType: "json"})
+				.done(function(res) {
+					
+	// 1.1 fetching (heading)
+					
+					//alert("Success");
+					var headings="<tr><th>"+res.columnDefs[0]["displayName"]+"</th>";	//for displaying it into html table
+					var cols=[];	//to add all column names
+			//canceled outer bracket "[{}]" - so only {} 
+					var h_into_json="[ {";	//for creating a json sile
+					
+					// here i have added first record - cell no, value
+					h_into_json += ' "A'+1+'":{"v":"'+res.columnDefs[0]["displayName"]+'","t":"s"} ';
+					
+					//loop to access all objects of columnDefs
+					$.each(res.columnDefs, function(i, item){
+							cols.push(item["field"]);
+							if (i === 0) return;
+						//var a=;
+						
+						//column names
+						var str = new String("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+						// for witing column id (A, B, ..., O)
+						var cell = str.charAt(i);
+						//for accesing field name
+						var a=item["displayName"];
+						headings += "<th>"+item["displayName"]+"</th>";
+						//creating a string of colums in json format
+						h_into_json +=', "'+cell+'1":{"v":"'+a+'","t":"s"} ';
+					});
+					//end of json string
+					h_into_json += "} "
+				//alert(cols);
+					headings += "</tr>";
+					$('table thead').append(headings);
+					//$('p.headings').html(h_into_json);
+					
+					//parsing
+					//var final_json = jQuery.parseJSON( h_into_json );
+	//headings done
+					//$('p.headings').html(h_into_json);
+					// displaying all headings on html
+					//document.getElementById("colss").innerHTML =cols;
+					
+					
+				//added column headings into "cols"
+	
+	// 1.2 fetching data rows
+					//var t_rows = '<tr> <td>'+res.data[0]["campaign_id"]+'</td></tr>';
+					//var a=res.data[0]["campaign_id"];
+					
+					//var another - for table string
+					var another = [];
+					//var - for storing json string
+					var for_data =" , ";
+					//alert("res.data.length= "+res.data.length);
+					//entering into each row
+					$.each(res.data, function (i, row){
+						//for EXCEL row no
+						var i_plus=i+2;
+						var another="<tr>";
+						//starting json object
+						for_data +=' { ';
+						//accessing each column in row 
+						$.each(cols, function (j, row_itm){
+							//var j_plus=j+1;
+							if(j!==0){for_data +=' , ';}
+							var str = new String("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+							// for witing column id (A, B, ..., O)
+							var cell = str.charAt(j);
+							var value = row[row_itm];
+							//alert(value);
+							
+							if($.isNumeric(value)){
+								for_data +=' "'+cell+i_plus+'":{"v":'+row[row_itm]+',"t":"n"} ';
+							}
+							else{
+								for_data +=' "'+cell+i_plus+'":{"v":"'+row[row_itm]+'","t":"s"} ';
+							}
+							another+="<td>"+row[row_itm]+"</td>";	//for all cols in each row
+							//another.push( row[cols[0]]);	//for single columns
+						});
+						//for(var j in cols){
+							//another+="<td>"+row[cols[j]]+"</td>";
+						//}
+						another+= "</tr>";
+						//alert("another= "+another);
+						$('table tbody').append(another);
+						for_data +=' } ';
+						var len = res.data.length-1;
+						//alert("leg23= "+len);
+						if(i!==len) {for_data +=' , ';}
+					});
+					for_data +=" ]";
+					//var a=res.data[0][cols[5]];
+					//alert("here another="+another);
+					//alert(res.data[0]."date_d");'
+					//$.("table tbody").append(t_rows);
+					//var final_json_data = jQuery.parseJSON( for_data );
+//Data into JSON done
+					var finalized = h_into_json+for_data
+					
+document.getElementById("colss").innerHTML =finalized;
+					
+				})
+				.fail(function(){
+					alert("Fail");
+				})
+				.always(function(){
+					//alert("Always block")
+				});
+			});
+		</script>
+		
+	</head>
+	<body>
+	<div class="container">
+		<h1> Read json file and create a json format to export that into excel</h1>
+		<table border="1">
+			<thead></thead>
+			<tbody></tbody>
+			<tfoot></tfoot>
+		</table>
+		<br> <br>
+		<p id="one"></p>
+		<hr> <br>
+		<p class="headings"></p>
+		<p id="colss"></p>
+	</div>
+	</body>
+</html>
